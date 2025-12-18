@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="120" viewBox="0 0 420 120" fill="none">
+  <defs>
+    <!-- Subtle gradient for premium SaaS feel -->
+    <linearGradient id="applyzeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0c4bfa"></stop>
+      <stop offset="100%" stop-color="#2563eb"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- Logo Text -->
+  <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Poppins, Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="72" font-weight="600" fill="url(#applyzeGradient)" letter-spacing="1">
+    Applyze
+  </text>
+</svg>
