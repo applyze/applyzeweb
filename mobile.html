@@ -1,61 +1,191 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="format-detection" content="telephone=no" />
   <title>Applyze Recruiting Bot</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    :root{
-      --brand:#0c4bfa;
-      --ink:#222;
-      --vh:1vh;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      font-family:"Poppins",system-ui;margin:0;color:var(--ink);background:#000;
-    }
+
+<style>
+
+:root{
+  --brand:#0c4bfa;
+  --brand-dark:#083ad8;
+  --paper:#ffffffdd;
+  --bot:#f3f6ff;
+  --user:#dcebff;
+  --radius:18px;
+  --shadow:0 6px 26px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:"Poppins",system-ui;
+  margin:0;color:#111;
+  background:#000;
+}
+
+/* CHAT CONTAINER */
+.chatbot{
+  position:fixed;
+  right:20px;
+  bottom:100px;
+  width:380px;
+  max-height:70vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
     .video-bg{
       position:fixed;top:0;left:0;width:100%;
       height:calc(var(--vh) * 100);
       object-fit:cover;z-index:-1;
-    }
-    .chatbot{
-      position:fixed;
-      right:12px;
-      bottom:96px;
-      width:360px;
-      max-height:calc(var(--vh) * 70);
-      display:flex;flex-direction:column;overflow:hidden;
-      border-radius:22px;background:#fff;
-      box-shadow:0 10px 30px rgba(0,0,0,.3)
-    }
-    .chatbot[hidden]{display:none}
-    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--brand);color:#fff;font-weight:600}
-    .chat-messages{flex:1;overflow:auto;padding:10px;background:#fff}
-    .msg{margin:6px 0;max-width:85%;line-height:1.5;font-size:14px}
-    .msg.bot{background:#f2f5ff;padding:8px 10px;border-radius:12px}
-    .msg.user{background:#eef3ff;color:#0c4bfa;margin-left:auto;padding:8px 10px;border-radius:12px}
-    .options{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
-    .option{
-      appearance:none;background:#0c4bfa;padding:10px 12px;border-radius:10px;
-      cursor:pointer;min-height:44px;font:inherit;color:#fff;font-weight:600;font-size:14px
-    }
-    .chat-input{display:flex;gap:6px;border-top:1px solid #eee;padding:8px}
-    .chat-input input{flex:1;border:1px solid #ddd;border-radius:10px;padding:12px 14px;font-size:16px}
-    .chat-input button{background:var(--brand);border:0;color:#fff;border-radius:10px;padding:12px 14px;font-weight:600}
-    #toggleChat{
-      position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;
-      border:0;background:var(--brand);color:#fff;font-size:28px;cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.35)
-    }
-  </style>
+    
+}
+
+/* CHAT HEADER */
+.chat-header{
+  font-weight:600;
+  background:var(--brand);
+  color:#fff;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:16px;
+}
+
+/* MESSAGE AREA */
+.chat-messages{
+  flex:1;
+  overflow:auto;
+  padding:14px;
+  background:linear-gradient(
+    rgba(255,255,255,.65),
+    rgba(255,255,255,.85)
+  );
+}
+
+/* CHAT BUBBLES */
+.msg{
+  margin:8px 0;
+  padding:12px 16px;
+  max-width:85%;
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.45;
+  font-weight:500;
+}
+
+.msg.bot{
+  background:var(--bot);
+  border:1px solid rgba(180,195,255,.45);
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+.msg.user{
+  background:var(--user);
+  border:1px solid rgba(150,180,255,.45);
+  margin-left:auto;
+  color:#0036c9;
+  box-shadow:0 2px 6px rgba(0,0,0,.06);
+}
+
+/* BUTTON OPTIONS */
+.options{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding-top:8px;
+}
+.option{
+  appearance:none;
+  background:var(--brand);
+  padding:10px 16px;
+  color:#fff;
+  font-weight:600;
+  border-radius:10px;
+  font-size:14px;
+  border:0;
+  cursor:pointer;
+  transition:.15s;
+}
+.option:hover{
+  background:var(--brand-dark);
+  transform:translateY(-2px);
+}
+
+/* INPUT BAR */
+.chat-input{
+  display:flex;
+  gap:8px;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:blur(10px);
+  border-top:1px solid rgba(0,0,0,.05);
+  padding:10px;
+}
+.chat-input input{
+  flex:1;
+  padding:14px 16px;
+  font-size:14px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  background:white;
+}
+.chat-input button{
+  background:var(--brand);
+  padding:14px 16px;
+  font-weight:600;
+  border-radius:12px;
+  border:0;
+  color:white;
+  cursor:pointer;
+  transition:.15s;
+}
+.chat-input button:hover{
+  background:var(--brand-dark);
+}
+
+/* FLOATING BUTTON */
+#toggleChat{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  width:64px;
+  height:64px;
+  border-radius:50%;
+  background:var(--brand);
+  border:0;
+  color:white;
+  font-size:28px;
+  cursor:pointer;
+  box-shadow:var(--shadow);
+  transition:transform .2s;
+}
+#toggleChat:hover{
+  transform:scale(1.08);
+}
+
+</style>
+
 </head>
 <body>
 
-<video class="video-bg" autoplay muted loop playsinline preload="auto">
+<dialog id="privacyModal" style="padding:20px;max-width:480px;border-radius:12px;">
+  <h3>Data Privacy Consent Policy</h3>
+  <p>
+    Your submitted information will be used for recruitment evaluation and
+    communication purposes only. We strictly protect all collected data and do
+    not share them with unauthorized entities. By continuing, you confirm that
+    all information you provide is true and that you voluntarily allow us to
+    process your data for recruitment assessment.
+  </p>
+  <button onclick="privacyModal.close()" style="margin-top:20px;padding:10px 18px;">Close</button>
+</dialog>
+
+
+<video class="video-bg" autoplay muted loop playsinline>
   <source src="applyze-motion.mp4" type="video/mp4">
 </video>
 
@@ -63,10 +193,10 @@
 
 <section class="chatbot" id="chatBot" hidden>
   <header class="chat-header">
-    <div>Recruiting Bot</div>
+    Recruiting Bot
     <div>
-      <button id="minimizeBtn" style="background:none;border:0;color:#fff;font-size:18px;">▁</button>
-      <button id="closeChat" style="background:none;border:0;color:#fff;font-size:18px;">✖</button>
+      <button id="minimizeBtn" style="background:none;border:0;color:#fff">▁</button>
+      <button id="closeChat" style="background:none;border:0;color:#fff">✖</button>
     </div>
   </header>
   <div class="chat-messages" id="messages"></div>
@@ -190,12 +320,49 @@ function handleResponse(val){
     case 0:
       showMessage("Select Language:");
       showOptions(["English","Tagalog"]);
-      step=1; break;
+      step=1; 
+      break;
 
     case 1:
-      applicant.language=val;
-      showMessage("Full Name:");
-      step=2; break;
+      applicant.language = val;
+
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      // NEW PRIVACY CONSENT STAGE
+      showMessage(
+        "Do you agree to our Data Privacy Consent Policy? " +
+        "<br><button class='option' type='button' id='openPrivacy'>Read Policy</button>"
+      );
+      showOptions(["Yes", "No"]);
+
+      setTimeout(()=>{
+        const btn = document.getElementById('openPrivacy');
+        if(btn){
+          btn.addEventListener('click', ()=>{
+            document.getElementById('privacyModal').showModal();
+          });
+        }
+      },150);
+
+      step = 1.1;
+      break;
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    case 1.1:
+      if(val === "No"){
+        showMessage(`
+          Thank you for using Applyze!<br><br>
+          You may return anytime if you change your mind.
+        `);
+        step = 999;
+        break;
+      }
+
+      if(val === "Yes"){
+        showMessage("Full Name:");
+        step = 2;
+        break;
+      }
+      break;
 
     case 2:
       applicant.name=val;
