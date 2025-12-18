@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Applyze Recruiting Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --brand:#0c4bfa;
+      --ink:#222;
+      --vh:1vh;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:"Poppins",system-ui;margin:0;color:var(--ink);background:#000;
+    }
+    .video-bg{
+      position:fixed;top:0;left:0;width:100%;
+      height:calc(var(--vh) * 100);
+      object-fit:cover;z-index:-1;
+    }
+    .chatbot{
+      position:fixed;
+      right:12px;
+      bottom:96px;
+      width:360px;
+      max-height:calc(var(--vh) * 70);
+      display:flex;flex-direction:column;overflow:hidden;
+      border-radius:22px;background:#fff;
+      box-shadow:0 10px 30px rgba(0,0,0,.3)
+    }
+    .chatbot[hidden]{display:none}
+    .chat-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--brand);color:#fff;font-weight:600}
+    .chat-messages{flex:1;overflow:auto;padding:10px;background:#fff}
+    .msg{margin:6px 0;max-width:85%;line-height:1.5;font-size:14px}
+    .msg.bot{background:#f2f5ff;padding:8px 10px;border-radius:12px}
+    .msg.user{background:#eef3ff;color:#0c4bfa;margin-left:auto;padding:8px 10px;border-radius:12px}
+    .options{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+    .option{
+      appearance:none;background:#0c4bfa;padding:10px 12px;border-radius:10px;
+      cursor:pointer;min-height:44px;font:inherit;color:#fff;font-weight:600;font-size:14px
+    }
+    .chat-input{display:flex;gap:6px;border-top:1px solid #eee;padding:8px}
+    .chat-input input{flex:1;border:1px solid #ddd;border-radius:10px;padding:12px 14px;font-size:16px}
+    .chat-input button{background:var(--brand);border:0;color:#fff;border-radius:10px;padding:12px 14px;font-weight:600}
+    #toggleChat{
+      position:fixed;bottom:20px;right:20px;width:60px;height:60px;border-radius:50%;
+      border:0;background:var(--brand);color:#fff;font-size:28px;cursor:pointer;
+      box-shadow:0 6px 16px rgba(0,0,0,.35)
+    }
+  </style>
+</head>
+<body>
+
+<video class="video-bg" autoplay muted loop playsinline preload="auto">
+  <source src="applyze-motion.mp4" type="video/mp4">
+</video>
+
+<button id="toggleChat">💬</button>
+
+<section class="chatbot" id="chatBot" hidden>
+  <header class="chat-header">
+    <div>Recruiting Bot</div>
+    <div>
+      <button id="minimizeBtn" style="background:none;border:0;color:#fff;font-size:18px;">▁</button>
+      <button id="closeChat" style="background:none;border:0;color:#fff;font-size:18px;">✖</button>
+    </div>
+  </header>
+  <div class="chat-messages" id="messages"></div>
+  <div class="chat-input">
+    <input id="userInput" type="text" placeholder="Type here…" />
+    <button id="sendBtn">Send</button>
+  </div>
+</section>
+
+<script>
+
+// CALENDAR RESTRICTED TO NEXT WEEK MON–FRI
+function getNextWeekDates() {
+  const today = new Date();
+  const list = [];
+
+  const nextMonday = new Date(today);
+  nextMonday.setDate(today.getDate() + ((8 - today.getDay()) % 7 || 7));
+
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(nextMonday);
+    d.setDate(nextMonday.getDate() + i);
+    list.push({
+      value: d.toISOString().split("T")[0],
+      label: d.toDateString()
+    });
+  }
+  return list;
+}
+
+function createRestrictedDatePicker() {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+
+  getNextWeekDates().forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = d.label;
+    btn.onclick = () => handleResponse(d.value);
+    wrap.appendChild(btn);
+  });
+
+  messagesEl.appendChild(wrap);
+}
+
+// SCRIPT URL
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzD7fzvV7g8CrTvy_dupO9qOQCIsjpYhUP98rUpLE-8ySWulAwUdWdEbrPyz0ELp_3GmQ/exec";
+
+let step = 0;
+let applicant = {};
+
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+
+function showMessage(html,who='bot'){
+  const div=document.createElement('div');
+  div.className=`msg ${who}`;
+  div.innerHTML=html;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop=messagesEl.scrollHeight;
+}
+
+function showOptions(arr){
+  const wrap=document.createElement('div');
+  wrap.className='options';
+  arr.forEach(label=>{
+    const b=document.createElement('button');
+    b.className='option';
+    b.textContent=label;
+    b.onclick=()=>handleResponse(label);
+    wrap.appendChild(b);
+  });
+  messagesEl.appendChild(wrap);
+}
+
+async function persist(){
+  const fd=new FormData();
+  fd.append('payload',JSON.stringify(applicant));
+  await fetch(APPS_SCRIPT_URL,{method:'POST',body:fd});
+}
+
+function showFailed(){
+  applicant.status="Failed";
+  persist();
+  showMessage(`
+    Thank you for reaching out! We truly appreciate your interest.<br><br>
+    At this stage, we’ve decided to move forward with other applicants who meet
+    our minimum requirements. We’ll keep your information on file and wish you
+    the best of luck in your job search.
+  `);
+  step=999;
+}
+
+function showSummary(){
+  applicant.status="For Interview";
+  persist();
+  showMessage(`
+    <b>SUMMARY</b><br><br>
+    • Name: ${applicant.name}<br>
+    • Email: ${applicant.email}<br>
+    • Contact: ${applicant.contact}<br>
+    • Education: ${applicant.education}<br>
+    • HR Exp: ${applicant.hrExp}<br>
+    • Admin Exp: ${applicant.adminExp}<br>
+    • Skills Relevant: ${applicant.skillsRelevant}<br>
+    • Qualified for: ${applicant.target}<br>
+    • Date: ${applicant.date}<br>
+    • Time: ${applicant.time}
+  `);
+  showMessage("Interview confirmed. Email sent.");
+  step=999;
+}
+
+function handleResponse(val){
+  if(!val) return;
+  inputEl.value="";
+  showMessage(val,'user');
+
+  switch(step){
+
+    case 0:
+      showMessage("Select Language:");
+      showOptions(["English","Tagalog"]);
+      step=1; break;
+
+    case 1:
+      applicant.language=val;
+      showMessage("Full Name:");
+      step=2; break;
+
+    case 2:
+      applicant.name=val;
+      showMessage("Email Address:");
+      step=3; break;
+
+    case 3:
+      applicant.email=val;
+      showMessage("Contact Number:");
+      step=4; break;
+
+    case 4:
+      applicant.contact=val;
+      showMessage("Educational Attainment:");
+      showOptions(["High School","College Undergraduate","College Graduate"]);
+      step=5; break;
+
+    case 5:
+      applicant.education=val;
+      showMessage("HR Experience:");
+      showOptions(["0 - 1 year","2 - 3 years","3 - 5 years","5 - 10 years"]);
+      step=6; break;
+
+    case 6:
+      applicant.hrExp=val;
+
+      if(val==="0 - 1 year"){
+        showMessage(
+          "HR role requires minimum 2 years experience.<br><br>" +
+          "Would you like to apply for Admin roles instead?"
+        );
+        showOptions(["Yes","No"]);
+        step=6.1;
+        break;
+      }
+
+      applicant.target="HR Staff Interview";
+      showMessage("Admin Experience:");
+      showOptions(["0 - 1 year","2 - 3 years","3 - 5 years","5 - 10 years"]);
+      step=7;
+      break;
+
+    case 6.1:
+      if(val==="No"){
+        showFailed();
+        break;
+      }
+      applicant.target="Admin Staff Interview";
+      showMessage("Admin Experience:");
+      showOptions(["0 - 1 year","2 - 3 years","3 - 5 years","5 - 10 years"]);
+      step=7;
+      break;
+
+    case 7:
+      applicant.adminExp=val;
+
+      showMessage("Skills/certifications relevant to work?");
+      showOptions(["Yes","No"]);
+      step=8;
+      break;
+
+    case 8:
+      applicant.skillsRelevant=val;
+
+      if(
+        applicant.hrExp==="0 - 1 year" &&
+        applicant.adminExp==="0 - 1 year" &&
+        val==="No"
+      ){
+        showFailed();
+        break;
+      }
+
+      if(
+        applicant.hrExp==="2 - 3 years" ||
+        applicant.hrExp==="3 - 5 years" ||
+        applicant.hrExp==="5 - 10 years"
+      ){
+        applicant.target="HR Staff Interview";
+      }
+
+      showMessage("Select interview date (next week, Mon–Fri only):");
+      createRestrictedDatePicker();
+      step=9;
+      break;
+
+    case 9:
+      applicant.date=val;
+      showMessage("Select interview time:");
+      showOptions([
+        "09:00 AM","10:00 AM","11:00 AM",
+        "01:00 PM","02:00 PM","03:00 PM","04:00 PM"
+      ]);
+      step=10; break;
+
+    case 10:
+      applicant.time=val;
+      showSummary();
+      break;
+  }
+}
+
+sendBtn.onclick=()=>handleResponse(inputEl.value);
+inputEl.addEventListener('keydown',e=>{if(e.key==="Enter")handleResponse(inputEl.value)});
+
+toggleChat.onclick=()=>chatBot.hidden=!chatBot.hidden;
+closeChat.onclick=()=>chatBot.hidden=true;
+minimizeBtn.onclick=()=>chatBot.style.maxHeight=chatBot.style.maxHeight?'':'46px';
+
+showMessage("Welcome to Applyze Recruiting Bot!");
+showOptions(["Start"]);
+
+</script>
+
+</body>
+</html>
