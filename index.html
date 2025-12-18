@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -171,6 +172,19 @@ body{
 </head>
 <body>
 
+<dialog id="privacyModal" style="padding:20px;max-width:480px;border-radius:12px;">
+  <h3>Data Privacy Consent Policy</h3>
+  <p>
+    Your submitted information will be used for recruitment evaluation and
+    communication purposes only. We strictly protect all collected data and do
+    not share them with unauthorized entities. By continuing, you confirm that
+    all information you provide is true and that you voluntarily allow us to
+    process your data for recruitment assessment.
+  </p>
+  <button onclick="privacyModal.close()" style="margin-top:20px;padding:10px 18px;">Close</button>
+</dialog>
+
+
 <video class="video-bg" autoplay muted loop playsinline>
   <source src="INNOV2_H264.mp4" type="video/mp4">
 </video>
@@ -306,12 +320,49 @@ function handleResponse(val){
     case 0:
       showMessage("Select Language:");
       showOptions(["English","Tagalog"]);
-      step=1; break;
+      step=1; 
+      break;
 
     case 1:
-      applicant.language=val;
-      showMessage("Full Name:");
-      step=2; break;
+      applicant.language = val;
+
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      // NEW PRIVACY CONSENT STAGE
+      showMessage(
+        "Do you agree to our Data Privacy Consent Policy? " +
+        "<br><button class='option' type='button' id='openPrivacy'>Read Policy</button>"
+      );
+      showOptions(["Yes", "No"]);
+
+      setTimeout(()=>{
+        const btn = document.getElementById('openPrivacy');
+        if(btn){
+          btn.addEventListener('click', ()=>{
+            document.getElementById('privacyModal').showModal();
+          });
+        }
+      },150);
+
+      step = 1.1;
+      break;
+      // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    case 1.1:
+      if(val === "No"){
+        showMessage(`
+          Thank you for using Applyze!<br><br>
+          You may return anytime if you change your mind.
+        `);
+        step = 999;
+        break;
+      }
+
+      if(val === "Yes"){
+        showMessage("Full Name:");
+        step = 2;
+        break;
+      }
+      break;
 
     case 2:
       applicant.name=val;
