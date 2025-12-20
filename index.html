@@ -166,6 +166,18 @@ body{
 #toggleChat:hover{
   transform:scale(1.08);
 }
+  #chatBot {
+  display: none;
+}
+
+#toggleChat {
+  width: auto;
+  height: auto;
+  border-radius: 30px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
 
 </style>
 
@@ -189,7 +201,9 @@ body{
   <source src="INNOV2_H264.mp4" type="video/mp4">
 </video>
 
-<button id="toggleChat">💬</button>
+  <button id="toggleChat">
+  Click here to chat 💬
+</button>
 
 <section class="chatbot" id="chatBot" hidden>
   <header class="chat-header">
@@ -468,9 +482,18 @@ function handleResponse(val){
 sendBtn.onclick=()=>handleResponse(inputEl.value);
 inputEl.addEventListener('keydown',e=>{if(e.key==="Enter")handleResponse(inputEl.value)});
 
-toggleChat.onclick=()=>chatBot.hidden=!chatBot.hidden;
-closeChat.onclick=()=>chatBot.hidden=true;
-minimizeBtn.onclick=()=>chatBot.style.maxHeight=chatBot.style.maxHeight?'':'46px';
+toggleChat.onclick = () => {
+  document.getElementById("chatBot").style.display = "flex";
+  document.getElementById("toggleChat").style.display = "none";
+};
+closeChat.onclick = () => {
+  document.getElementById("chatBot").style.display = "none";
+  document.getElementById("toggleChat").style.display = "block";
+};
+minimizeBtn.onclick = () => {
+  document.getElementById("chatBot").style.display = "none";
+  document.getElementById("toggleChat").style.display = "block";
+};
 
 showMessage("Welcome to Applyze Recruiting Bot!");
 showOptions(["Start"]);
@@ -479,6 +502,7 @@ showOptions(["Start"]);
 
 </body>
 </html>
+
 
 
 
